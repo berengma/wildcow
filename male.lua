@@ -21,31 +21,37 @@ local function male_brain(self)
 		if self.hungry < 10 then mobkit.hurt(self,1) end
 	end
 	
-	if mobkit.timer(self,5) then
-		local members = water_life.get_herd_members(self,32)
-		local score = 0
-		local entity = {}
-		-- this loop is searching for the herd boss with the highest score. All others will be deleted.
-		if #members > 1 then
-			for i = #members,1,-1 do
-				entity = members[i]:get_luaentity()
-				if entity then
-					--minetest.chat_send_all(dump(entity.head).."   :   "..dump(score))
-							
-					if entity.head <= score then
-						table.remove(members,i)
-					else
-						score = entity.head
-					end
-				else
-					table.remove(members,i)
-				end
-			end
-			
-			local hpos = members[1]:get_pos()
-			--minetest.chat_send_all(dump("Boss-POS :"..minetest.pos_to_string(hpos)).."    score= "..dump(score))
-			if self.head ~= score then self.base = hpos end			-- if active mob (self) is not boss then remember boss position
+	if mobkit.timer(self,2) then
+		local prty = mobkit.get_queue_priority(self)
 		
+		if prty < 15 then
+			local members = water_life.get_herd_members(self,water_life.abr * 16)
+			local score = 0
+			local entity = {}
+			-- this loop is searching for the herd boss with the highest score. All others will be deleted.
+			if #members > 1 then
+				for i = #members,1,-1 do
+					entity = members[i]:get_luaentity()
+					if entity then
+						--minetest.chat_send_all(dump(entity.head).."   :   "..dump(score))
+								
+						if entity.head <= score then
+							table.remove(members,i)
+						else
+							score = entity.head
+						end
+					else
+						table.remove(members,i)
+					end
+				end
+				
+				local hpos = members[1]:get_pos()
+				local showpos = mobkit.pos_shift(hpos,{y=2})
+				--water_life.temp_show(showpos,2,5)
+				--minetest.chat_send_all(dump("Boss-POS :"..minetest.pos_to_string(hpos)).."    score= "..dump(score))
+				if self.head ~= score then self.base = hpos end			-- if active mob (self) is not boss then remember boss position
+			
+			end
 		end
 	end
 	
@@ -62,7 +68,7 @@ local function male_brain(self)
 		local pos = self.object:get_pos() 
 		
 		if prty < 15  then
-			local pred = mobkit.get_closest_entity(self,'water_life:crocodile')
+			local pred = mobkit.get_closest_entity(self,'water_life:croc')
 			if not pred then pred = mobkit.get_closest_entity(self,'water_life:snake') end
 			
 			if pred then 
@@ -79,12 +85,21 @@ local function male_brain(self)
 				return
 			end
 		end
-        if prty < 5 then
-            if random(100) > self.hungry then
-                wildcow.hq_find_food(self,5,5)
-                return
-            end
-        end
+		
+		if prty < 9 and self.base then
+			local boss = math.floor(vector.distance(pos,self.base))
+			--minetest.chat_send_all(dump(boss))
+			if boss > 10 then
+				water_life.hq_findpath(self,9,self.base, 7,0.5)
+			end
+		end
+			
+		if prty < 5 then
+			if random(100) > self.hungry then
+				wildcow.hq_find_food(self,5,5)
+				return
+			end
+		end
 		if mobkit.is_queue_empty_high(self) then
 			mobkit.hq_roam(self,0)
             self.hungry = self.hungry -5
@@ -92,20 +107,16 @@ local function male_brain(self)
 	end
 end
 
--- spawning is too specific to be included in the api, this is an example.
--- a modder will want to refer to specific names according to games/mods they're using 
--- in order for mobs not to spawn on treetops, certain biomes etc.
-
 minetest.register_entity("wildcow:auroch_male",{
 											-- common props
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = true,
-	collisionbox = {-0.35, -0.19, -0.35, 0.35, 0.65, 0.35},
+	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
 	visual = "mesh",
 	mesh = "wildcow_auroch_male.b3d",
 	textures = {"wildcow_auroch_male.png"},
-	visual_size = {x = 1.3, y = 1.3},
+	visual_size = {x = 1, y = 1},
 	static_save = true,
 	makes_footstep_sound = true,
 	on_step = mobkit.stepfunc,	-- required
@@ -118,14 +129,14 @@ minetest.register_entity("wildcow:auroch_male",{
 	jump_height = 1.26,
 	view_range = 24,
 	lung_capacity = 20,			-- seconds
-	max_hp = 20,
+	max_hp = 50,
 	hungry = 100,
-	timeout = 600,
+	timeout = 0,
 	base = nil,
 	head = 65535,
 	wild = true,
 	swarm = {},
-	attack={range=0.5,damage_groups={fleshy=3}},
+	attack={range=0.5,damage_groups={fleshy=10}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',

@@ -6,7 +6,7 @@ local abs = math.abs
 local function spawnstep(dtime)
     
     spawntimer = spawntimer + dtime
-    if spawntimer < 10 then return end
+    if spawntimer < 30 then return end
 
 	for _,plyr in ipairs(minetest.get_connected_players()) do
             
@@ -22,16 +22,14 @@ local function spawnstep(dtime)
 			local friends = water_life.count_objects(pos,abr*16, mobname)
 			if not friends[mobname] then friends[mobname] = 0 end
 			
-			if random(100) < (100 - ((100/wildcow.herdsize * friends[mobname]) or 1)) then
+			if random(100) < (100 - (100/wildcow.herdsize * friends[mobname])) then
 	
-				if height and height >= 0 and height <= 100 and not liquidflag -- and math.abs(height-pos2.y) <= 30 testin
+				if height and height >= 0 and height <= 100 and not liquidflag
 				and mobkit.nodeatpos({x=pos2.x,y=height-0.01,z=pos2.z}).is_ground_content then
 
 						
 
 						pos2.y = height+0.5
-						
-						--minetest.chat_send_all(dump(friends[mobname]).." : "..dump(wildcow.herdsize))
 
 						if not minetest.is_protected(pos2,mobname) then
 							local obj = minetest.add_entity(pos2,mobname)
