@@ -8,17 +8,17 @@ local function male_brain(self)
 
 	if self.hp <= 0 then	
 		mobkit.clear_queue_high(self)
-        if hdrops then water_life.handle_drops(self) end
+		water_life.handle_drops(self)
 		mobkit.hq_die(self)
 		return
 	end
 	
-	if not self.hungry then self.hungry = 100 end
-	if mobkit.timer(self,300) then self.hungry = self.hungry - 10 end
+	
+	if mobkit.timer(self,120) then water_life.hunger(self,-10) end
 	
 	
-	if mobkit.timer(self,10) and self.hungry then
-		if self.hungry < 10 then mobkit.hurt(self,1) end
+	if mobkit.timer(self,10) then
+		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
 	end
 	
 	if mobkit.timer(self,2) then
@@ -35,10 +35,11 @@ local function male_brain(self)
 					if entity then
 						--minetest.chat_send_all(dump(entity.head).."   :   "..dump(score))
 								
-						if entity.head <= score then
+						if water_life.head(entity) <= score then
 							table.remove(members,i)
+							water_life.is_boss(entity,0)
 						else
-							score = entity.head
+							score = water_life.head(entity)
 						end
 					else
 						table.remove(members,i)
@@ -46,10 +47,12 @@ local function male_brain(self)
 				end
 				
 				local hpos = members[1]:get_pos()
+				local obj = members[1]:get_luaentity()
+				water_life.is_boss(obj,1)
 				local showpos = mobkit.pos_shift(hpos,{y=2})
 				--water_life.temp_show(showpos,2,5)
 				--minetest.chat_send_all(dump("Boss-POS :"..minetest.pos_to_string(hpos)).."    score= "..dump(score))
-				if self.head ~= score then self.base = hpos end			-- if active mob (self) is not boss then remember boss position
+				if water_life.head(self) ~= score then water_life.headpos(self,hpos) end			-- if active mob (self) is not boss then remember boss position
 			
 			end
 		end
@@ -57,15 +60,24 @@ local function male_brain(self)
 	
 	if mobkit.timer(self,1) then 
 		local prty = mobkit.get_queue_priority(self)
-        
+		local obj = self.object
+		local pos = self.object:get_pos()
+		local bosspos = water_life.headpos(self)
+		
+		--[[
+		obj:set_nametag_attributes({
+				color = '#ff7373',
+				text = ">>> "..tostring(water_life.is_boss(self)).."% <<<",
+				})
+		]]
         
 		if prty < 20 and self.isinliquid then
 			mobkit.hq_liquid_recovery(self,20)
-            self.hungry = self.hungry - 10
+			water_life.hunger(self,-10)
 			return
 		end
 		
-		local pos = self.object:get_pos() 
+		 
 		
 		if prty < 15  then
 			local pred = mobkit.get_closest_entity(self,'water_life:croc')
@@ -73,36 +85,40 @@ local function male_brain(self)
 			
 			if pred then 
 				mobkit.hq_runfrom(self,15,pred)
-                self.hungry = self.hungry -5
+				water_life.hunger(self,-5)
 				return
 			end
 		end
-		if prty < 10 then
+		if prty < 13 then
 			local plyr = mobkit.get_nearby_player(self)
 			if plyr and vector.distance(pos,plyr:get_pos()) < 8 and not self.tamed then 
-				mobkit.hq_runfrom(self,10,plyr)
-                self.hungry = self.hungry -5
+				mobkit.hq_runfrom(self,13,plyr)
+				water_life.hunger(self,-5)
 				return
 			end
 		end
 		
-		if prty < 9 and self.base then
-			local boss = math.floor(vector.distance(pos,self.base))
-			--minetest.chat_send_all(dump(boss))
-			if boss > 10 then
-				water_life.hq_findpath(self,9,self.base, 7,0.5)
-			end
-		end
-			
-		if prty < 5 then
-			if random(100) > self.hungry then
-				wildcow.hq_find_food(self,5,5)
+		if prty < 9 then
+			if random(100) > water_life.hunger(self) then
+				local radius = 5 + math.floor((100 - water_life.hunger(self))/20) * 5
+				if water_life.is_boss(self) > 0 then radius = radius * 2 end			-- boss sees everything
+				wildcow.hq_find_food(self,9,radius)
 				return
 			end
 		end
+		
+		if prty < 5 and bosspos then
+			local boss = math.floor(vector.distance(pos,bosspos))
+			--minetest.chat_send_all(dump(boss))
+			if boss > 10 then
+				water_life.hq_findpath(self,5,bosspos, 7,0.5)
+			end
+		end
+			
+		
 		if mobkit.is_queue_empty_high(self) then
 			mobkit.hq_roam(self,0)
-            self.hungry = self.hungry -5
+			water_life.hunger(self,-5)
 		end
 	end
 end
@@ -111,7 +127,7 @@ minetest.register_entity("wildcow:auroch_male",{
 											-- common props
 	physical = true,
 	stepheight = 0.1,				--EVIL!
-	collide_with_objects = true,
+	collide_with_objects = false,
 	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
 	visual = "mesh",
 	mesh = "wildcow_auroch_male.b3d",
@@ -130,12 +146,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	view_range = 24,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
-	hungry = 100,
 	timeout = 0,
-	base = nil,
-	head = 65535,
-	wild = true,
-	swarm = {},
 	attack={range=0.5,damage_groups={fleshy=10}},
 	sounds = {
 		--scared='deer_scared',

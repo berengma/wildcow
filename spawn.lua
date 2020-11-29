@@ -35,9 +35,7 @@ local function spawnstep(dtime)
 							local obj = minetest.add_entity(pos2,mobname)
 							if obj then
 									local entity = obj:get_luaentity()
-									entity.base = pos2
-									entity.head = random(65535)
-									mobkit.remember(entity,"life",math.floor(os.clock()))
+									water_life.init_bio(entity)
 							end
 						
 					end
