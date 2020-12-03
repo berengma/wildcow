@@ -1,7 +1,7 @@
 local random = water_life.random
 
 
-local function male_brain(self)
+local function female_brain(self)
 	if self.tamed == nil then self.tamed = false end
 	if mobkit.timer(self,1) then wildcow.node_dps_dmg(self) end
 	mobkit.vitals(self)
@@ -74,6 +74,7 @@ local function male_brain(self)
 		if prty < 20 and self.isinliquid then
 			mobkit.hq_liquid_recovery(self,20)
 			water_life.hunger(self,-10)
+			return
 		end
 		
 		 
@@ -83,17 +84,17 @@ local function male_brain(self)
 			if not pred then pred = mobkit.get_closest_entity(self,'water_life:snake') end
 			
 			if pred then 
-				mobkit.clear_queue_high(self)
 				mobkit.hq_runfrom(self,15,pred)
 				water_life.hunger(self,-5)
+				return
 			end
 		end
 		if prty < 13 then
 			local plyr = mobkit.get_nearby_player(self)
-			if plyr and vector.distance(pos,plyr:get_pos()) < 16 and not self.tamed then 
-				mobkit.clear_queue_high(self)
-				wildcow.hq_stare(self,13,plyr)
+			if plyr and vector.distance(pos,plyr:get_pos()) < 8 and not self.tamed then 
+				mobkit.hq_runfrom(self,13,plyr)
 				water_life.hunger(self,-5)
+				return
 			end
 		end
 		
@@ -102,6 +103,7 @@ local function male_brain(self)
 				local radius = 5 + math.floor((100 - water_life.hunger(self))/20) * 5
 				if water_life.is_boss(self) > 0 then radius = radius * 2 end			-- boss sees everything
 				wildcow.hq_find_food(self,9,radius)
+				return
 			end
 		end
 		
@@ -121,15 +123,15 @@ local function male_brain(self)
 	end
 end
 
-minetest.register_entity("wildcow:auroch_male",{
+minetest.register_entity("wildcow:auroch_female",{
 											-- common props
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
 	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
 	visual = "mesh",
-	mesh = "wildcow_auroch_male.b3d",
-	textures = {"wildcow_auroch_male.png"},
+	mesh = "wildcow_auroch_female.b3d",
+	textures = {"wildcow_auroch_female.png"},
 	visual_size = {x = 1, y = 1},
 	static_save = true,
 	makes_footstep_sound = true,
@@ -145,7 +147,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
 	timeout = 0,
-	attack={range=1.5,damage_groups={fleshy=5}},
+	attack={range=0.5,damage_groups={fleshy=10}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',
@@ -157,24 +159,36 @@ minetest.register_entity("wildcow:auroch_male",{
 	stand={range={x=31,y=74},speed=15,loop=true},
 	eat={range={x=0,y=30},speed=15,loop=true},
 	attack={range={x=145,y=160},speed=20,loop=true},
-	headdown={range={x=150,y=150},speed =0, loop=false},
 	},
 	drops = {
 		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
 	},
 	
-	brainfunc = male_brain,
+	brainfunc = female_brain,
 
 	on_punch=function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-		if time_from_last_punch > 1 then
-			local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
-			self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
-			mobkit.make_sound(self,'hurt')
-			mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
-		end
+		local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
+		self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
+		mobkit.make_sound(self,'hurt')
+		mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
 	end,
 	
+	on_rightclick = function(self, clicker)
+        if not clicker or not clicker:is_player() then return end
+        local inv = clicker:get_inventory()
+        local item = clicker:get_wielded_item()
+        --minetest.chat_send_all(dump(item:get_name()))
+        if not item or item:get_name() ~= water_life.catchBA then return end
+        if not inv:room_for_item("main", "wildcow:auroch_female_item") then return end
+        local pos = mobkit.get_stand_pos(self)
+		local name = clicker:get_player_name()
+		local hasowner = minetest.is_protected(pos)
+        if hasowner and self.tamed then return end
+                                            
+        inv:add_item("main", "wildcow:auroch_female_item")
+        self.object:remove()
+    end,
 })
 
 

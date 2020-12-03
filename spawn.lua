@@ -12,7 +12,10 @@ local function spawnstep(dtime)
             
 			spawntimer = 0
 			
+			local borg = random(1000)
 			local mobname =  'wildcow:auroch_male'
+			if borg > 500 then mobname = 'wildcow:auroch_female' end
+			
 			local yaw = plyr:get_look_horizontal() + random()*0.35 - 0.75
 			local pos = plyr:get_pos()
 			local dir = vector.multiply(minetest.yaw_to_dir(yaw),abr*16)
