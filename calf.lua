@@ -1,7 +1,7 @@
 local random = water_life.random
 
 
-local function female_brain(self)
+local function calf_brain(self)
 	if self.tamed == nil then self.tamed = false end
 	if mobkit.timer(self,1) then wildcow.node_dps_dmg(self) end
 	mobkit.vitals(self)
@@ -14,12 +14,7 @@ local function female_brain(self)
 	end
 	
 	
-	if mobkit.timer(self,120) then 
-		if water_life.pregnant(self) < 0 then
-			water_life.horny(self,-1)
-		end
-		water_life.hunger(self,-5)
-	end
+	if mobkit.timer(self,120) then water_life.hunger(self,-5) end
 	
 	
 	if mobkit.timer(self,10) then
@@ -68,33 +63,13 @@ local function female_brain(self)
 		local obj = self.object
 		local pos = self.object:get_pos()
 		local bosspos = water_life.headpos(self)
-		local calf = water_life.pregnant(self)
-		
-		if calf > 0 then
-			calf = os.clock() - calf
-			if calf > wildcow.ptime then
-				-- add little calf here
-				water_life.pregnant(self,-1)
-			end
-		end
 		
 		
+		obj:set_nametag_attributes({
+				color = '#ff7373',
+				text = ">>> "..tostring(water_life.hunger(self)).."% <<<",
+				})
 		
-		if wildcow.debug then
-			local kepala = ""
-			local hamil = "not_pregnant"
-			if water_life.is_boss(self) == 1 then kepala="BOSS" end
-			if water_life.pregnant(self) >= 0 then
-				local timer = wildcow.ptime - math.floor( os.clock() - water_life.pregnant(self))
-				hamil=tostring(timer).." secs left"
-			end
-			
-			
-			obj:set_nametag_attributes({
-					color = '#ff7373',
-					text = kepala.."\n"..hamil.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
-					})
-		end	
         
 		if prty < 20 and self.isinliquid then
 			mobkit.hq_liquid_recovery(self,20)
@@ -148,15 +123,15 @@ local function female_brain(self)
 	end
 end
 
-minetest.register_entity("wildcow:auroch_female",{
+minetest.register_entity("wildcow:auroch_calf",{
 											-- common props
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
 	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
 	visual = "mesh",
-	mesh = "wildcow_auroch_female.b3d",
-	textures = {"wildcow_auroch_female.png"},
+	mesh = "wildcow_auroch_calf.b3d",
+	textures = {"wildcow_auroch_calf_male.png"},
 	visual_size = {x = 1, y = 1},
 	static_save = true,
 	makes_footstep_sound = true,
@@ -166,11 +141,11 @@ minetest.register_entity("wildcow:auroch_female",{
 											-- api props
 	springiness=0,
 	buoyancy = 0.9,
-	max_speed = 5,
+	max_speed = 4,
 	jump_height = 1.26,
-	view_range = 24,
-	lung_capacity = 20,			-- seconds
-	max_hp = 50,
+	view_range = 12,
+	lung_capacity = 10,			-- seconds
+	max_hp = 25,
 	timeout = 0,
 	attack={range=0.5,damage_groups={fleshy=10}},
 	sounds = {
@@ -190,7 +165,7 @@ minetest.register_entity("wildcow:auroch_female",{
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
 	},
 	
-	brainfunc = female_brain,
+	brainfunc = calf_brain,
 
 	on_punch=function(self, puncher, time_from_last_punch, tool_capabilities, dir)
 		local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
@@ -215,5 +190,4 @@ minetest.register_entity("wildcow:auroch_female",{
         self.object:remove()
     end,
 })
-
 
