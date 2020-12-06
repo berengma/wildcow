@@ -26,7 +26,7 @@ local function male_brain(self)
 		local horny = water_life.horny(self)
 		local hunger = water_life.hunger(self)
 		
-		if prty < 30 and water_life.is_boss(self) == 1 and horny < 70 and hunger > horny then
+		if prty < 30 and water_life.is_boss(self) == 1 and horny < 95 and hunger > horny then
 				mobkit.clear_queue_high(self)
 				wildcow.hq_meetmygirl(self,30)
 		end
@@ -155,7 +155,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	buoyancy = 0.9,
 	max_speed = 5,
 	jump_height = 1.26,
-	view_range = 24,
+	view_range = 14,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
 	timeout = 0,

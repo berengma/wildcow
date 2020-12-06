@@ -5,6 +5,32 @@ local min=math.min
 local max=math.max
 
 
+function wildcow.whereismum(self,radius,reverse)
+	if not self then return nil end
+	if not radius then radius = self.view_range end
+	local pos = mobkit.get_stand_pos(self)
+	local name = "wildcow:auroch_female"
+	if reverse then name = "wildcow:auroch_calf" end
+	
+	local otable = minetest.get_objects_inside_radius(pos,radius)
+	local dna = water_life.dna(self)
+	
+	for i = #otable,1,-1 do
+				local entity = otable[i]:get_luaentity()
+				if entity and entity.name == name  then 
+					if water_life.dna(entity) ~= dna then
+						table.remove(otable,i)
+					end
+				else
+					table.remove(otable,i)
+				end
+	end
+	
+	return otable
+	
+end
+
+
 local function find_matching_partners(self)
 	local pos = mobkit.get_stand_pos(self)
 	local name = "wildcow:auroch_female"
@@ -14,7 +40,7 @@ local function find_matching_partners(self)
 	for i = #otable,1,-1 do
 				local entity = otable[i]:get_luaentity()
 				if entity and entity.name == name then
-					if abs(water_life.horny(entity) - horny) > 50 or water_life.pregnant(entity) > 0 then
+					if abs(water_life.horny(entity) - horny) > 50 or water_life.pregnant(entity) > 0 or water_life.is_parent(entity) > 0 then
 						table.remove(otable,i)
 					end
 				else
@@ -112,7 +138,7 @@ function wildcow.hq_meetmygirl(self,prty)
 				local mate = find_matching_partners(self)
 				local hunger = math.floor(water_life.hunger(self)/20) -1
 				
-				minetest.chat_send_all(dump(#mate).." matches found, energy for "..hunger.." of them")
+				--minetest.chat_send_all(dump(#mate).." matches found, energy for "..hunger.." of them")
 				if not mate or #mate < 1 then return true end
 				
 				if hunger > #mate then hunger = #mate end
@@ -178,8 +204,8 @@ function wildcow.hq_goto(self,prty,tpos)
 	local func = function(self)
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 			local pos = mobkit.get_stand_pos(self)
-			if vector.distance(pos,tpos) >= 1.2 then
-				wildcow.goto_next_waypoint(self,tpos,0.5)
+			if vector.distance(pos,tpos) >= 1.2 then          --1.2
+				wildcow.goto_next_waypoint(self,tpos)
 			else
 				return true
 			end
@@ -191,7 +217,7 @@ end
 
 function wildcow.goto_next_waypoint(self,tpos,speedfactor)
 	local height, pos2 = mobkit.get_next_waypoint(self,tpos)
-	if not speedfactor then speedfactor = 1 end
+	if not speedfactor or speedfactor < 1 then speedfactor = 1 end
 	
 	if not height then return false end
 	
@@ -218,7 +244,7 @@ function wildcow.hq_find_food(self,prty,radius)
 	local pos1 = {x=pos.x -radius,y=pos.y-1,z=pos.z-radius}
 	local pos2 = {x=pos.x +radius,y=pos.y+1,z=pos.z+radius}  --mobkit.pos_translate2d(pos,yaw,radius)
 	local food = minetest.find_nodes_in_area(pos1,pos2, {"group:growing","group:plant"})
-	if not food or #food < 1 then food = minetest.find_nodes_in_area(pos1,pos2, {"group:flora","group:leaves","default:dry_shrub","default:papyrus"}) end
+	if not food or #food < 1 then food = minetest.find_nodes_in_area(pos1,pos2, {"group:flora","default:papyrus","default:dry_shrub"}) end
 	food = sortout(self,food)
 	if #food < 1 then return true end
 	--minetest.chat_send_all("### "..dump(#food).." ###")
@@ -229,7 +255,7 @@ function wildcow.hq_find_food(self,prty,radius)
 		local pos = mobkit.get_stand_pos(self)
 	
     
-		if self.isonground then --mobkit.is_queue_empty_low(self) and self.isonground then
+		if mobkit.is_queue_empty_low(self) and self.isonground then
 					
 					if vector.distance(pos,snack) > 2 then
 						if init then

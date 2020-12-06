@@ -18,6 +18,10 @@ local function female_brain(self)
 		if water_life.pregnant(self) < 0 then
 			water_life.horny(self,-1)
 		end
+		local baby = wildcow.whereismum(self,32,true)
+		if not baby or #baby == 0 then
+			water_life.is_parent(self,0)
+		end
 		water_life.hunger(self,-5)
 	end
 	
@@ -69,11 +73,23 @@ local function female_brain(self)
 		local pos = self.object:get_pos()
 		local bosspos = water_life.headpos(self)
 		local calf = water_life.pregnant(self)
+		local dna = water_life.dna(self)
+		
 		
 		if calf > 0 then
 			calf = os.clock() - calf
 			if calf > wildcow.ptime then
-				-- add little calf here
+				if random(100) < water_life.hunger(self) then
+					
+					local obj = minetest.add_entity(pos,'wildcow:auroch_calf')
+								if obj then
+										water_life.hunger(self,-30)
+										water_life.is_parent(self,1)
+										local entity = obj:get_luaentity()
+										water_life.init_bio(entity)
+										water_life.dna(entity,dna)
+								end
+				end
 				water_life.pregnant(self,-1)
 			end
 		end
@@ -88,6 +104,8 @@ local function female_brain(self)
 				local timer = wildcow.ptime - math.floor( os.clock() - water_life.pregnant(self))
 				hamil=tostring(timer).." secs left"
 			end
+			if water_life.is_parent(self) > 0 then hamil = "Mama" end
+			
 			
 			
 			obj:set_nametag_attributes({
@@ -109,6 +127,8 @@ local function female_brain(self)
 			if not pred then pred = mobkit.get_closest_entity(self,'water_life:snake') end
 			
 			if pred then 
+				mobkit.clear_queue_high(self)
+				mobkit.clear_queue_low(self)
 				mobkit.hq_runfrom(self,15,pred)
 				water_life.hunger(self,-1)
 				return
@@ -117,6 +137,8 @@ local function female_brain(self)
 		if prty < 13 then
 			local plyr = mobkit.get_nearby_player(self)
 			if plyr and vector.distance(pos,plyr:get_pos()) < 8 and not self.tamed then 
+				mobkit.clear_queue_high(self)
+				mobkit.clear_queue_low(self)
 				mobkit.hq_runfrom(self,13,plyr)
 				water_life.hunger(self,-1)
 				return
@@ -168,7 +190,7 @@ minetest.register_entity("wildcow:auroch_female",{
 	buoyancy = 0.9,
 	max_speed = 5,
 	jump_height = 1.26,
-	view_range = 24,
+	view_range = 12,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
 	timeout = 0,

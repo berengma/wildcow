@@ -14,60 +14,44 @@ local function calf_brain(self)
 	end
 	
 	
-	if mobkit.timer(self,120) then water_life.hunger(self,-5) end
+	if mobkit.timer(self,120) then 	
+		water_life.hunger(self,-5)
+	end
 	
 	
 	if mobkit.timer(self,10) then
 		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
 	end
 	
-	if mobkit.timer(self,2) then
-		local prty = mobkit.get_queue_priority(self)
-		
-		if prty < 15 then
-			local members = water_life.get_herd_members(self,water_life.abr * 16)
-			local score = 0
-			local entity = {}
-			-- this loop is searching for the herd boss with the highest score. All others will be deleted.
-			if #members > 1 then
-				for i = #members,1,-1 do
-					entity = members[i]:get_luaentity()
-					if entity then
-						--minetest.chat_send_all(dump(entity.head).."   :   "..dump(score))
-								
-						if water_life.head(entity) <= score then
-							table.remove(members,i)
-							water_life.is_boss(entity,0)
-						else
-							score = water_life.head(entity)
-						end
-					else
-						table.remove(members,i)
-					end
-				end
-				
-				local hpos = members[1]:get_pos()
-				local obj = members[1]:get_luaentity()
-				water_life.is_boss(obj,1)
-				local showpos = mobkit.pos_shift(hpos,{y=2})
-				--water_life.temp_show(showpos,2,5)
-				--minetest.chat_send_all(dump("Boss-POS :"..minetest.pos_to_string(hpos)).."    score= "..dump(score))
-				if water_life.head(self) ~= score then water_life.headpos(self,hpos) end			-- if active mob (self) is not boss then remember boss position
-			
-			end
-		end
-	end
+	
 	
 	if mobkit.timer(self,1) then 
 		local prty = mobkit.get_queue_priority(self)
 		local obj = self.object
 		local pos = self.object:get_pos()
-		local bosspos = water_life.headpos(self)
+		local mama = wildcow.whereismum(self,16)
+		local bosspos = pos
+		if mama and #mama > 0 then 
+			bosspos = mama[1]:get_pos()
+		end
 		
+		if self.time_total > wildcow.btime then
+			local name = "wildcow:auroch_female"
+			if random(100) > 50 then name = "wildcow:auroch_male" end
+			mobkit.clear_queue_high(self)
+			mobkit.hq_die(self)
+			--self.object:remove()
+			local obj = minetest.add_entity(pos,name)
+			if obj then
+				local entity = obj:get_luaentity()
+				water_life.init_bio(entity)
+			end
+			return
+		end
 		
 		obj:set_nametag_attributes({
 				color = '#ff7373',
-				text = ">>> "..tostring(water_life.hunger(self)).."% <<<",
+				text = tostring(math.floor(self.time_total*100)/100).."s lifetime\n"..tostring(water_life.hunger(self)),
 				})
 		
         
@@ -77,41 +61,20 @@ local function calf_brain(self)
 			return
 		end
 		
-		 
 		
-		if prty < 15  then
-			local pred = mobkit.get_closest_entity(self,'water_life:croc')
-			if not pred then pred = mobkit.get_closest_entity(self,'water_life:snake') end
-			
-			if pred then 
-				mobkit.hq_runfrom(self,15,pred)
-				water_life.hunger(self,-1)
-				return
-			end
-		end
-		if prty < 13 then
-			local plyr = mobkit.get_nearby_player(self)
-			if plyr and vector.distance(pos,plyr:get_pos()) < 8 and not self.tamed then 
-				mobkit.hq_runfrom(self,13,plyr)
-				water_life.hunger(self,-1)
-				return
-			end
-		end
-		
-		if prty < 9 then
+		if prty < 15 then
 			if random(100) > water_life.hunger(self) then
 				local radius = 5 + math.floor((100 - water_life.hunger(self))/20) * 5
-				if water_life.is_boss(self) > 0 then radius = radius * 2 end			-- boss sees everything
-				wildcow.hq_find_food(self,9,radius)
+				wildcow.hq_find_food(self,15,radius)
 				return
 			end
 		end
 		
-		if prty < 5 and bosspos then
+		if prty < 10 and bosspos then
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
-			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5)
+			if boss > 5 then
+				water_life.hq_findpath(self,10,bosspos, 3,0.5)
 			end
 		end
 			
@@ -143,8 +106,8 @@ minetest.register_entity("wildcow:auroch_calf",{
 	buoyancy = 0.9,
 	max_speed = 4,
 	jump_height = 1.26,
-	view_range = 12,
-	lung_capacity = 10,			-- seconds
+	view_range = 10,
+	lung_capacity = 20,			-- seconds
 	max_hp = 25,
 	timeout = 0,
 	attack={range=0.5,damage_groups={fleshy=10}},
@@ -164,6 +127,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
 	},
+	mama = {},
 	
 	brainfunc = calf_brain,
 
@@ -175,19 +139,19 @@ minetest.register_entity("wildcow:auroch_calf",{
 	end,
 	
 	on_rightclick = function(self, clicker)
-        if not clicker or not clicker:is_player() then return end
-        local inv = clicker:get_inventory()
-        local item = clicker:get_wielded_item()
-        --minetest.chat_send_all(dump(item:get_name()))
-        if not item or item:get_name() ~= water_life.catchBA then return end
-        if not inv:room_for_item("main", "wildcow:auroch_female_item") then return end
-        local pos = mobkit.get_stand_pos(self)
+		if not clicker or not clicker:is_player() then return end
+		local inv = clicker:get_inventory()
+		local item = clicker:get_wielded_item()
+		--minetest.chat_send_all(dump(item:get_name()))
+		if not item or item:get_name() ~= water_life.catchBA then return end
+		if not inv:room_for_item("main", "wildcow:auroch_female_item") then return end
+		local pos = mobkit.get_stand_pos(self)
 		local name = clicker:get_player_name()
 		local hasowner = minetest.is_protected(pos)
-        if hasowner and self.tamed then return end
+		if hasowner and self.tamed then return end
                                             
-        inv:add_item("main", "wildcow:auroch_female_item")
-        self.object:remove()
-    end,
+		inv:add_item("main", "wildcow:auroch_female_item")
+		self.object:remove()
+	end,
 })
 
