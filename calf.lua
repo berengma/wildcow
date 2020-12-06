@@ -49,10 +49,12 @@ local function calf_brain(self)
 			return
 		end
 		
-		obj:set_nametag_attributes({
-				color = '#ff7373',
-				text = tostring(math.floor(self.time_total*100)/100).."s lifetime\n"..tostring(water_life.hunger(self)),
-				})
+		if wildcow.debug then
+			obj:set_nametag_attributes({
+					color = '#ff7373',
+					text = tostring(math.floor(self.time_total*100)/100).."s lifetime\n"..tostring(water_life.hunger(self)),
+					})
+		end
 		
         
 		if prty < 20 and self.isinliquid then
