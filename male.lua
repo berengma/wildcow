@@ -14,11 +14,23 @@ local function male_brain(self)
 	end
 	
 	
-	if mobkit.timer(self,120) then water_life.hunger(self,-10) end
+	if mobkit.timer(self,120) then
+		water_life.hunger(self,-5)
+		water_life.horny(self,-5)
+	end
 	
 	
 	if mobkit.timer(self,10) then
 		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
+		local prty = mobkit.get_queue_priority(self)
+		local horny = water_life.horny(self)
+		local hunger = water_life.hunger(self)
+		
+		if prty < 30 and water_life.is_boss(self) == 1 and horny < 95 and hunger > horny then
+				mobkit.clear_queue_high(self)
+				wildcow.hq_meetmygirl(self,30)
+		end
+		
 	end
 	
 	if mobkit.timer(self,2) then
@@ -64,19 +76,22 @@ local function male_brain(self)
 		local pos = self.object:get_pos()
 		local bosspos = water_life.headpos(self)
 		
-		--[[
-		obj:set_nametag_attributes({
-				color = '#ff7373',
-				text = ">>> "..tostring(water_life.is_boss(self)).."% <<<",
-				})
-		]]
-        
+		
+		if wildcow.debug then
+			local kepala = ""
+			if water_life.is_boss(self) == 1 then kepala="BOSS" end
+			
+			
+			obj:set_nametag_attributes({
+					color = '#ff7373',
+					text = kepala.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
+					})
+		end	
+		
 		if prty < 20 and self.isinliquid then
 			mobkit.hq_liquid_recovery(self,20)
-			water_life.hunger(self,-10)
+			water_life.hunger(self,-5)
 		end
-		
-		 
 		
 		if prty < 15  then
 			local pred = mobkit.get_closest_entity(self,'water_life:croc')
@@ -85,7 +100,7 @@ local function male_brain(self)
 			if pred then 
 				mobkit.clear_queue_high(self)
 				mobkit.hq_runfrom(self,15,pred)
-				water_life.hunger(self,-5)
+				water_life.hunger(self,-1)
 			end
 		end
 		if prty < 13 then
@@ -93,7 +108,6 @@ local function male_brain(self)
 			if plyr and vector.distance(pos,plyr:get_pos()) < 16 and not self.tamed then 
 				mobkit.clear_queue_high(self)
 				wildcow.hq_stare(self,13,plyr)
-				water_life.hunger(self,-5)
 			end
 		end
 		
@@ -116,7 +130,7 @@ local function male_brain(self)
 		
 		if mobkit.is_queue_empty_high(self) then
 			mobkit.hq_roam(self,0)
-			water_life.hunger(self,-5)
+			water_life.hunger(self,-1)
 		end
 	end
 end
@@ -141,7 +155,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	buoyancy = 0.9,
 	max_speed = 5,
 	jump_height = 1.26,
-	view_range = 24,
+	view_range = 14,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
 	timeout = 0,
