@@ -21,12 +21,13 @@ local function male_brain(self)
 	
 	
 	if mobkit.timer(self,10) then
+		water_life.is_alive(self,-10)
 		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
 		local prty = mobkit.get_queue_priority(self)
 		local horny = water_life.horny(self)
 		local hunger = water_life.hunger(self)
 		
-		if prty < 30 and water_life.is_boss(self) == 1 and horny < 95 and hunger > horny then
+		if prty < 30 and water_life.is_boss(self) == 1 and horny < 70 and hunger > horny then
 				mobkit.clear_queue_high(self)
 				wildcow.hq_meetmygirl(self,30)
 		end
@@ -35,6 +36,12 @@ local function male_brain(self)
 	
 	if mobkit.timer(self,2) then
 		local prty = mobkit.get_queue_priority(self)
+		
+		if water_life.is_alive(self) < 0 then
+			mobkit.clear_queue_high(self)
+			mobkit.hq_die(self)
+			return
+		end
 		
 		if prty < 15 then
 			local members = water_life.get_herd_members(self,water_life.abr * 16)
@@ -84,7 +91,7 @@ local function male_brain(self)
 			
 			obj:set_nametag_attributes({
 					color = '#ff7373',
-					text = kepala.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
+					text = tostring(water_life.is_alive(self)).."\n"..kepala.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
 					})
 		end	
 		
@@ -158,8 +165,8 @@ minetest.register_entity("wildcow:auroch_male",{
 	view_range = 14,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
-	timeout = 0,
-	attack={range=1.5,damage_groups={fleshy=5}},
+	timeout = wildcow.lifetime,
+	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',
