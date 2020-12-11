@@ -122,7 +122,7 @@ function wildcow.hq_meetmygirl(self,prty)
 			if passangan == {} then return true end
 			tpos = passangan:get_pos()
 			--water_life.temp_show(tpos,5,5)
-			if not water_life.gopath(self,tpos) then
+			if not water_life.gopath(self,tpos,nil,true) then
 				--minetest.chat_send_all("No way to there")
 				return true
 			end
@@ -260,7 +260,7 @@ function wildcow.hq_find_food(self,prty,radius)
 					if vector.distance(pos,snack) > 2 then
 						if init then
 							--wildcow.hq_goto(self,prty+1,snack)
-							water_life.hq_findpath(self,prty+1,snack, 2,0.5)
+							water_life.hq_findpath(self,prty+1,snack, 2,0.5,true)
 							init=false
 						end
 					else

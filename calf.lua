@@ -76,7 +76,7 @@ local function calf_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 5 then
-				water_life.hq_findpath(self,10,bosspos, 3,0.5)
+				water_life.hq_findpath(self,10,bosspos, 3,0.5,true)
 			end
 		end
 			
