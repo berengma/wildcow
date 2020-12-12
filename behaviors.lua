@@ -78,13 +78,14 @@ function wildcow.hq_overrun(self,prty,target)
 	
 	local func = function(self)
 		if not mobkit.is_alive(target) then return true end
+		if water_life.dist2tgt(self,target) > self.view_range then return true end
 		
 		if water_life.dist2tgt(self,target) < 1 then
-			 target:punch(self.object,1,self.attack) --wildcow.knockback(target,dir,3)
+			 target:punch(self.object,1,self.attack) 
 		end
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 			local pos = mobkit.get_stand_pos(self)
-			if vector.distance(pos,tpos) >= 1.1 then
+			if vector.distance(pos,tpos) >= 1.3 then
 				wildcow.goto_next_waypoint(self,tpos,2)
 			else
 				return true
@@ -169,7 +170,7 @@ end
 
 function wildcow.hq_stare(self,prty,target)
 	local init = true
-	local gethim = 10
+	local gethim = 7
 	
 	local func = function(self)
 		if not mobkit.is_alive(target) then return true end

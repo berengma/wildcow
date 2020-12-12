@@ -52,7 +52,7 @@ local function calf_brain(self)
 		if wildcow.debug then
 			obj:set_nametag_attributes({
 					color = '#ff7373',
-					text = tostring(math.floor(self.time_total*100)/100).."s lifetime\n"..tostring(water_life.hunger(self)),
+					text = tostring(wildcow.btime - math.floor(self.time_total*100)/100).."\n"..tostring(water_life.is_alive(self)),
 					})
 		end
 		
@@ -111,8 +111,8 @@ minetest.register_entity("wildcow:auroch_calf",{
 	view_range = 10,
 	lung_capacity = 20,			-- seconds
 	max_hp = 25,
-	timeout = 0,
-	attack={range=0.5,damage_groups={fleshy=10}},
+	timeout = 1440,
+	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',
@@ -126,8 +126,8 @@ minetest.register_entity("wildcow:auroch_calf",{
 	attack={range={x=145,y=160},speed=20,loop=true},
 	},
 	drops = {
-		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
-		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
+		{name = "default:diamond", chance = 20, min = 1, max = 1,},		
+		{name = "water_life:meat_raw", chance = 2, min = 1, max = 1,},
 	},
 	mama = {},
 	

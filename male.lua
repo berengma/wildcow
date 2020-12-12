@@ -29,7 +29,7 @@ local function male_brain(self)
 		
 		if prty < 30 and water_life.is_boss(self) == 1 and horny < 70 and hunger > horny then
 				mobkit.clear_queue_high(self)
-				wildcow.hq_meetmygirl(self,30)
+				wildcow.hq_meetmygirl(self,8)
 		end
 		
 	end
@@ -95,7 +95,7 @@ local function male_brain(self)
 					})
 		end	
 		
-		if prty < 20 and self.isinliquid then
+		if prty < 20 and water_life.inwater(self.object) then
 			mobkit.hq_liquid_recovery(self,20)
 			water_life.hunger(self,-5)
 		end
@@ -147,7 +147,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
-	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
+	collisionbox = {-0.45, 0, -0.45, 0.45, 0.85, 0.45},
 	visual = "mesh",
 	mesh = "wildcow_auroch_male.b3d",
 	textures = {"wildcow_auroch_male.png"},

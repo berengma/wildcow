@@ -9,12 +9,12 @@ local path = minetest.get_modpath(minetest.get_current_modname())
 
 
 wildcow = {}
-wildcow.spawnfreq = 10					-- spawn frequency
-wildcow.herdsize = 5					-- max member in a herd
-wildcow.ptime = 720						-- time in secs until baby is born
-wildcow.btime = 1440					-- time for a calf until it is grewn up
+wildcow.spawnfreq = 30									-- spawn frequency
+wildcow.herdsize = 5									-- max member in a herd
+wildcow.ptime = 720										-- time in secs until baby is born
+wildcow.btime = 1440									-- time needed for a calf to grew up to an adult
 wildcow.lifetime = (wildcow.btime+wildcow.ptime)*4			-- lifetime in seconds
-wildcow.debug = false					-- show debug
+wildcow.debug = false									-- show debug
 
 
 
