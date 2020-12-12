@@ -78,13 +78,14 @@ function wildcow.hq_overrun(self,prty,target)
 	
 	local func = function(self)
 		if not mobkit.is_alive(target) then return true end
+		if water_life.dist2tgt(self,target) > self.view_range then return true end
 		
 		if water_life.dist2tgt(self,target) < 1 then
-			 target:punch(self.object,1,self.attack) --wildcow.knockback(target,dir,3)
+			 target:punch(self.object,1,self.attack) 
 		end
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 			local pos = mobkit.get_stand_pos(self)
-			if vector.distance(pos,tpos) >= 1.1 then
+			if vector.distance(pos,tpos) >= 1.3 then
 				wildcow.goto_next_waypoint(self,tpos,2)
 			else
 				return true
@@ -122,7 +123,7 @@ function wildcow.hq_meetmygirl(self,prty)
 			if passangan == {} then return true end
 			tpos = passangan:get_pos()
 			--water_life.temp_show(tpos,5,5)
-			if not water_life.gopath(self,tpos) then
+			if not water_life.gopath(self,tpos,nil,true) then
 				--minetest.chat_send_all("No way to there")
 				return true
 			end
@@ -169,7 +170,7 @@ end
 
 function wildcow.hq_stare(self,prty,target)
 	local init = true
-	local gethim = 10
+	local gethim = 7
 	
 	local func = function(self)
 		if not mobkit.is_alive(target) then return true end
@@ -260,7 +261,7 @@ function wildcow.hq_find_food(self,prty,radius)
 					if vector.distance(pos,snack) > 2 then
 						if init then
 							--wildcow.hq_goto(self,prty+1,snack)
-							water_life.hq_findpath(self,prty+1,snack, 2,0.5)
+							water_life.hq_findpath(self,prty+1,snack, 2,0.5,true)
 							init=false
 						end
 					else

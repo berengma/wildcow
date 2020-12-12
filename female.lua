@@ -18,9 +18,11 @@ local function female_brain(self)
 		if water_life.pregnant(self) < 0 then
 			water_life.horny(self,-1)
 		end
-		local baby = wildcow.whereismum(self,32,true)
-		if not baby or #baby == 0 then
-			water_life.is_parent(self,0)
+		if water_life.is_parent(self) > 0 then
+			local baby = wildcow.whereismum(self,32,true)
+			if not baby or #baby == 0 then
+				water_life.is_parent(self,0)
+			end
 		end
 		water_life.hunger(self,-5)
 	end
@@ -28,10 +30,17 @@ local function female_brain(self)
 	
 	if mobkit.timer(self,10) then
 		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
+		water_life.is_alive(self,-10)
 	end
 	
 	if mobkit.timer(self,2) then
 		local prty = mobkit.get_queue_priority(self)
+		
+		if water_life.is_alive(self) < 0 then
+			mobkit.clear_queue_high(self)
+			mobkit.hq_die(self)
+			return
+		end
 		
 		if prty < 15 then
 			local members = water_life.get_herd_members(self,water_life.abr * 16)
@@ -110,11 +119,11 @@ local function female_brain(self)
 			
 			obj:set_nametag_attributes({
 					color = '#ff7373',
-					text = kepala.."\n"..hamil.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
+					text = tostring(water_life.is_alive(self)).."\n"..kepala.."\n"..hamil.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
 					})
 		end	
         
-		if prty < 20 and self.isinliquid then
+		if prty < 20 and water_life.inwater(self.object) then
 			mobkit.hq_liquid_recovery(self,20)
 			water_life.hunger(self,-5)
 			return
@@ -158,7 +167,7 @@ local function female_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5)
+				water_life.hq_findpath(self,5,bosspos, 7,0.5,true)
 			end
 		end
 			
@@ -175,7 +184,7 @@ minetest.register_entity("wildcow:auroch_female",{
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
-	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
+	collisionbox = {-0.45, 0, -0.45, 0.45, 0.85, 0.45},
 	visual = "mesh",
 	mesh = "wildcow_auroch_female.b3d",
 	textures = {"wildcow_auroch_female.png"},
@@ -193,8 +202,8 @@ minetest.register_entity("wildcow:auroch_female",{
 	view_range = 12,
 	lung_capacity = 20,			-- seconds
 	max_hp = 50,
-	timeout = 0,
-	attack={range=0.5,damage_groups={fleshy=10}},
+	timeout = wildcow.lifetime,
+	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',

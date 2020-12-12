@@ -3,28 +3,27 @@ local abs = math.abs
 local random = water_life.random
 local min=math.min
 local max=math.max
+local hdrops = minetest.get_modpath("water_life")
+local mflowers = minetest.get_modpath("flowers")
+local path = minetest.get_modpath(minetest.get_current_modname())
+
 
 wildcow = {}
-wildcow.spawn_rate = 0.5		-- less is more
-wildcow.spawnfreq = 10		-- spawn frequency
-wildcow.herdsize = 5		-- max member in a herd
-wildcow.ptime = 720			-- time in secs until baby is born
-wildcow.btime = 1440		-- time for a calf until it is grewn up
-wildcow.debug = false
+wildcow.spawnfreq = 30									-- spawn frequency
+wildcow.herdsize = 5									-- max member in a herd
+wildcow.ptime = 720										-- time in secs until baby is born
+wildcow.btime = 1440									-- time needed for a calf to grew up to an adult
+wildcow.lifetime = (wildcow.btime+wildcow.ptime)*4			-- lifetime in seconds
+wildcow.debug = false									-- show debug
 
 
-wildcow.spawn_rate = 1 - max(min(minetest.settings:get('wildcow_spawn_chance') or 0.2,1),0)
-wildcow.spawn_reduction = minetest.settings:get('wildcow_spawn_reduction') or 0.5
 
-
-local hdrops = minetest.get_modpath("water_life")
-
-
+-- shark and croc food for water_life
 water_life.register_shark_food("wildcow:auroch_male")
 water_life.register_shark_food("wildcow:auroch_female")
 water_life.register_shark_food("wildcow:auroch_calf")
 
-local path = minetest.get_modpath(minetest.get_current_modname())
+
 
 
 dofile(path.."/behaviors.lua")
@@ -33,6 +32,19 @@ dofile(path.."/female.lua")
 dofile(path.."/calf.lua")
 dofile(path.."/spawn.lua")
 
+
+if mflowers then
+	minetest.register_abm({
+		label = "Wildcow flower spread",
+		nodenames = {"group:flora"},
+		interval = 30,
+		chance = 4,
+		catch_up = true,
+		action = function(pos, node, active_object_count, active_object_count_wider)
+			flowers.flower_spread(pos,node)
+		end,
+	})
+end
 
 
 minetest.override_item("default:marram_grass_1", {
