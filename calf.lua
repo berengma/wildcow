@@ -110,7 +110,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 	jump_height = 1.26,
 	view_range = 10,
 	lung_capacity = 20,			-- seconds
-	max_hp = 25,
+	max_hp = 13,
 	timeout = 1440,
 	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
@@ -126,7 +126,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 	attack={range={x=145,y=160},speed=20,loop=true},
 	},
 	drops = {
-		{name = "default:diamond", chance = 20, min = 1, max = 1,},		
+		{name = "default:diamond", chance = 50, min = 1, max = 1,},		
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 1,},
 	},
 	mama = {},
