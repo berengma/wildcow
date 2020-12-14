@@ -201,7 +201,7 @@ minetest.register_entity("wildcow:auroch_female",{
 	jump_height = 1.26,
 	view_range = 12,
 	lung_capacity = 20,			-- seconds
-	max_hp = 50,
+	max_hp = 25,
 	timeout = wildcow.lifetime,
 	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
@@ -224,10 +224,15 @@ minetest.register_entity("wildcow:auroch_female",{
 	brainfunc = female_brain,
 
 	on_punch=function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-		local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
-		self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
-		mobkit.make_sound(self,'hurt')
-		mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
+		if puncher:is_player() and time_from_last_punch > 1 then
+			local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
+			self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
+			mobkit.make_sound(self,'hurt')
+			mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
+		elseif not puncher:is_player() then
+			mobkit.make_sound(self,'hurt')
+			mobkit.hurt(self,self.attack.damage_groups.fleshy or 1)
+		end
 	end,
 	
 	on_rightclick = function(self, clicker)

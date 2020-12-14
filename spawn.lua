@@ -25,6 +25,7 @@ local function spawnstep(dtime)
 			local mobname = "wildcow:auroch_male"
 			
 			spawntimer = 0
+			local toomuch = false
 			local pos = plyr:get_pos()
 			local yaw = plyr:get_look_horizontal()
 			local animal = water_life.count_objects(pos)
@@ -32,12 +33,21 @@ local function spawnstep(dtime)
 			
 			local radius = (water_life.abr * 12)												-- 75% from 16 = 12 nodes
 			radius = random(16,radius)														-- not nearer than 7 nodes in front of player
-			local angel = math.rad(random(90))                                       					-- look for random angel 0 - 75 degrees
+			local angel = math.rad(random(80))                                       					-- look for random angel 0 - 75 degrees
 			if water_life.leftorright() then yaw = yaw + angel else yaw = yaw - angel end   			-- add or substract to/from yaw
-				
 			local pos2 = mobkit.pos_translate2d(pos,yaw,radius)									-- calculate position
 			local bdata =  water_life_get_biome_data(pos2)										-- get biome data at spawn position
 			local landpos = water_life.find_node_under_air(pos2,5,{"group:crumbly"})
+			if not landpos then																-- maybe too steep, try from above
+				
+				local factor = water_life.abr * 8
+				local pos_up = {x=pos2.x, y=pos2.y + factor, z=pos2.z}									-- max y position
+				local pos_down = {x=pos2.x, y=pos2.y - factor, z=pos2.z}								-- min y position
+				local surface = water_life.find_collision(pos_up,pos_down,true)							-- find surface
+				if surface then pos2 = {x=pos_up.x, y= pos_up.y - surface, z=pos_up.z} end					-- new surface position
+				landpos = water_life.find_node_under_air(pos2,5,{"group:crumbly"})
+			end
+			
 			local cows = getcount(animal["wildcow:auroch_female"])
 			local bulls = getcount(animal["wildcow:auroch_male"])
 			local calf = getcount(animal["wildcow:auroch_calf"])
@@ -45,6 +55,8 @@ local function spawnstep(dtime)
 			if cows + bulls + calf > wildcow.herdsize * 2 then toomuch = true end
 			
 			if bulls > cows then mobname = "wildcow:auroch_female" end
+			
+			--minetest.chat_send_all(dump(bulls).." : "..dump(cows).." : "..dump(calf).." : "..dump(toomuch))
 			
 
 			if landpos and not toomuch then
@@ -56,7 +68,6 @@ local function spawnstep(dtime)
 					end
 						
 				end
-				
 			end
 		
 	end
