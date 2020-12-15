@@ -93,7 +93,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
-	collisionbox = {-0.45, 0, -0.45, 0.45, 0.95, 0.45},
+	collisionbox = {-0.35, 0, -0.35, 0.35, 0.75, 0.35},
 	visual = "mesh",
 	mesh = "wildcow_auroch_calf.b3d",
 	textures = {"wildcow_auroch_calf_male.png"},
