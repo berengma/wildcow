@@ -167,7 +167,7 @@ local function female_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5,true)
+				water_life.hq_findpath(self,5,bosspos, 7,0.5,wildcow.fast_pf)
 			end
 		end
 			

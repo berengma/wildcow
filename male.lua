@@ -28,7 +28,7 @@ local function male_brain(self)
 		local horny = water_life.horny(self)
 		local hunger = water_life.hunger(self)
 		
-		if prty < 30 and water_life.is_boss(self) == 1 and horny < 70 and hunger > horny then
+		if prty < 30 and water_life.is_boss(self) == 1 and horny < 80 and hunger > horny then
 				mobkit.clear_queue_high(self)
 				wildcow.hq_meetmygirl(self,8)
 		end
@@ -141,7 +141,7 @@ local function male_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5,true)
+				water_life.hq_findpath(self,5,bosspos, 7,0.5,wildcow.fast_pf)
 			end
 		end
 			
