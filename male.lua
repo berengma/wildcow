@@ -28,7 +28,7 @@ local function male_brain(self)
 		local horny = water_life.horny(self)
 		local hunger = water_life.hunger(self)
 		
-		if prty < 30 and water_life.is_boss(self) == 1 and horny < 70 and hunger > horny then
+		if prty < 30 and water_life.is_boss(self) == 1 and horny < 80 and hunger > horny then
 				mobkit.clear_queue_high(self)
 				wildcow.hq_meetmygirl(self,8)
 		end
@@ -141,7 +141,7 @@ local function male_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5,true)
+				water_life.hq_findpath(self,5,bosspos, 7,0.5,wildcow.fast_pf)
 			end
 		end
 			
@@ -158,7 +158,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
-	collisionbox = {-0.45, 0, -0.45, 0.45, 0.85, 0.45},
+	collisionbox = {-0.35, 0, -0.35, 0.35, 0.85, 0.35},
 	visual = "mesh",
 	mesh = "wildcow_auroch_male.b3d",
 	textures = {"wildcow_auroch_male.png"},

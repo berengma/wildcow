@@ -123,7 +123,7 @@ function wildcow.hq_meetmygirl(self,prty)
 			if passangan == {} then return true end
 			tpos = passangan:get_pos()
 			--water_life.temp_show(tpos,5,5)
-			if not water_life.gopath(self,tpos,nil,true) then
+			if not water_life.gopath(self,tpos,nil,wildcow.fast_pf) then
 				--minetest.chat_send_all("No way to there")
 				return true
 			end
@@ -205,7 +205,7 @@ function wildcow.hq_goto(self,prty,tpos)
 	local func = function(self)
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 			local pos = mobkit.get_stand_pos(self)
-			if vector.distance(pos,tpos) >= 1.2 then          --1.2
+			if vector.distance(pos,tpos) >= 3 then          --1.2
 				wildcow.goto_next_waypoint(self,tpos)
 			else
 				return true
@@ -258,10 +258,10 @@ function wildcow.hq_find_food(self,prty,radius)
     
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 					
-					if vector.distance(pos,snack) > 2 then
+					if vector.distance(pos,snack) > 1.5 then
 						if init then
 							--wildcow.hq_goto(self,prty+1,snack)
-							water_life.hq_findpath(self,prty+1,snack, 2,0.5,true)
+							water_life.hq_findpath(self,prty+1,snack, 1.5,0.5,wildcow.fast_pf)
 							init=false
 						end
 					else

@@ -167,7 +167,7 @@ local function female_brain(self)
 			local boss = math.floor(vector.distance(pos,bosspos))
 			--minetest.chat_send_all(dump(boss))
 			if boss > 10 then
-				water_life.hq_findpath(self,5,bosspos, 7,0.5,true)
+				water_life.hq_findpath(self,5,bosspos, 7,0.5,wildcow.fast_pf)
 			end
 		end
 			
@@ -184,7 +184,7 @@ minetest.register_entity("wildcow:auroch_female",{
 	physical = true,
 	stepheight = 0.1,				--EVIL!
 	collide_with_objects = false,
-	collisionbox = {-0.45, 0, -0.45, 0.45, 0.85, 0.45},
+	collisionbox = {-0.35, 0, -0.35, 0.35, 0.85, 0.35},
 	visual = "mesh",
 	mesh = "wildcow_auroch_female.b3d",
 	textures = {"wildcow_auroch_female.png"},
