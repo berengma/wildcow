@@ -130,6 +130,10 @@ minetest.register_entity("wildcow:auroch_calf",{
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 1,},
 	},
 	mama = {},
+	predators = {["water_life:croc"]=1,
+                  ["water_life:alligator"]=1,
+                  ["water_life:snake"]=1,
+                  },
 	
 	brainfunc = calf_brain,
 
