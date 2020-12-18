@@ -77,13 +77,30 @@ local function female_brain(self)
 	end
 	
 	if mobkit.timer(self,1) then 
+		local childent = nil
+		local predator = nil
+		local danger = ""
 		local prty = mobkit.get_queue_priority(self)
 		local obj = self.object
 		local pos = self.object:get_pos()
 		local bosspos = water_life.headpos(self)
 		local calf = water_life.pregnant(self)
 		local dna = water_life.dna(self)
+		local baby = wildcow.whereismum(self,8,true)							-- true searches for calfs, not females
+		if baby and #baby > 0 then
+			childent = baby[1]:get_luaentity()								-- get the entity to do further checks
+		end
 		
+		if childent then
+			predator = water_life.get_closest_enemy(childent,true)
+			if predator then
+				if predator:is_player() then
+					danger = "\n DANGER: "..predator:get_player_name()
+				else
+					danger = "\n DANGER: "..predator:get_luaentity().name
+				end
+			end
+		end
 		
 		if calf > 0 then
 			calf = os.clock() - calf
@@ -119,10 +136,22 @@ local function female_brain(self)
 			
 			obj:set_nametag_attributes({
 					color = '#ff7373',
-					text = tostring(water_life.is_alive(self)).."\n"..kepala.."\n"..hamil.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny",
+					text = tostring(water_life.is_alive(self)).."\n"..kepala.."\n"..hamil.."\n"..tostring(water_life.hunger(self)).."% hunger\n"..tostring(water_life.horny(self)).."% horny"..danger,
 					})
 		end	
-        
+		
+		if prty < 50 and predator and baby[1] then						-- do not mess with MAMA !
+				local ppos = predator:get_pos()
+				local bpos = baby[1]:get_pos()
+				local dist = water_life.dist2tgt(childent,predator)
+				if math.abs(ppos.y - bpos.y) < 3 and dist < 8 and not water_life.inwater(predator) then
+					wildcow.hq_overrun(self,50,predator)
+				end
+		end
+			
+			
+		
+		
 		if prty < 20 and water_life.inwater(self.object) then
 			mobkit.hq_liquid_recovery(self,20)
 			water_life.hunger(self,-5)

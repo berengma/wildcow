@@ -177,7 +177,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	lung_capacity = 20,			-- seconds
 	max_hp = 25,
 	timeout = wildcow.lifetime,
-	attack={range=0.5,damage_groups={fleshy=5}},
+	attack={range=0.5,damage_groups={fleshy=10}},
 	sounds = {
 		--scared='deer_scared',
 		--hurt = 'deer_hurt',

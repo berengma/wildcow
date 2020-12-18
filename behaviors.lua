@@ -75,14 +75,22 @@ function wildcow.hq_overrun(self,prty,target)
 	tpos = mobkit.pos_translate2d(mobkit.get_stand_pos(self),tyaw,10)
 	local dir = vector.subtract(tpos,pos)
 	mobkit.clear_queue_high(self)
+	local hit = false
 	
 	local func = function(self)
 		if not mobkit.is_alive(target) then return true end
-		if water_life.dist2tgt(self,target) > self.view_range then return true end
+		local dist = water_life.dist2tgt(self,target)
+		if dist > self.view_range then return true end
+		dist = math.floor(dist + 0.5)
 		
-		if water_life.dist2tgt(self,target) < 1 then
-			 target:punch(self.object,1,self.attack) 
+		
+		if dist == 1 and not hit then
+			mobkit.animate(self,'attack')
+			target:punch(self.object,1,self.attack) 
+			water_life.knockback_player(self,target,20)
+			hit = true
 		end
+		
 		if mobkit.is_queue_empty_low(self) and self.isonground then
 			local pos = mobkit.get_stand_pos(self)
 			if vector.distance(pos,tpos) >= 1.3 then
