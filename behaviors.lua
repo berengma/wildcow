@@ -3,6 +3,7 @@ local abs = math.abs
 local random = water_life.random
 local min=math.min
 local max=math.max
+local p2s = minetest.pos_to_string
 
 
 function wildcow.whereismum(self,radius,reverse)
@@ -56,13 +57,18 @@ local function sortout(self,ftable)
 	local pos = mobkit.get_stand_pos(self)
 	pos.y = pos.y + 0.5
 	
+	
+	
 	for i = #ftable,1,-1 do
 		
+		--[[
 		if water_life.find_collision(pos,ftable[i],true) then 
 			table.remove(ftable,i)
 		end
-		--local way = water_life.find_path(pos, ftable[i], self, self.dtime)
-		--if not way or #way < 2 then table.remove(ftable,i) end
+		]]
+		local way = water_life.find_path(pos, ftable[i], self, self.dtime,true)
+		minetest.chat_send_all(dump(way))
+		if not way or #way < 2 then table.remove(ftable,i) end
 	end
 	return ftable
 end
@@ -251,41 +257,48 @@ function wildcow.hq_find_food(self,prty,radius)
 	local yaw =  self.object:get_yaw()
 	local pos = mobkit.get_stand_pos(self)
 	local pos1 = {x=pos.x -radius,y=pos.y-1,z=pos.z-radius}
-	local pos2 = {x=pos.x +radius,y=pos.y+1,z=pos.z+radius}  --mobkit.pos_translate2d(pos,yaw,radius)
-	local food = minetest.find_nodes_in_area(pos1,pos2, {"group:growing","group:plant"})
-	if not food or #food < 1 then food = minetest.find_nodes_in_area(pos1,pos2, {"group:flora","default:papyrus","default:dry_shrub"}) end
-	food = sortout(self,food)
-	if #food < 1 then return true end
-	--minetest.chat_send_all("### "..dump(#food).." ###")
-	local snack = food[random(#food)]
+	local pos2 = {x=pos.x +radius,y=pos.y+1,z=pos.z+radius}
+	local food = minetest.find_node_near(pos,radius, {"group:growing","group:plant"})
+	if not food then food = minetest.find_node_near(pos,radius, {"group:flora","default:papyrus","default:dry_shrub"}) end
+	if not food then food =  minetest.find_node_near(pos, 5, {"default:dirt_with_grass"}) end
+	if not food then return true end
+	local snack = food
 	local anim = false
+	local sinit = false
 	
 	local func = function(self)
 		local pos = mobkit.get_stand_pos(self)
-	
-    
+		--water_life.temp_show(snack,1,5)
+		
+		-- if too near pathfinder returns nil. You already stand on top of it !
+		if vector.distance(pos,snack) > 2 and not water_life.find_path(pos, snack, self, self.dtime,true) then return true end 
+		
 		if mobkit.is_queue_empty_low(self) and self.isonground then
-					
-					if vector.distance(pos,snack) > 1.5 then
+					if vector.distance(pos,snack) > 1.6 then
 						if init then
 							--wildcow.hq_goto(self,prty+1,snack)
 							water_life.hq_findpath(self,prty+1,snack, 1.5,0.5,wildcow.fast_pf)
 							init=false
 						end
 					else
-						self.object:set_velocity({x=0,y=0,z=0})
-						mobkit.animate(self,'eat')
-						--water_life.temp_show(snack,5)
-						
-						minetest.after(2,function ()
-							if minetest.get_node(snack).name == "default:papyrus" then
-								minetest.dig_node(snack)
-							else
-								minetest.set_node(snack,{name="air"})
-							end
-							anim = true
-						end)
-						if anim then
+						if not anim and not sinit then
+							self.object:set_velocity({x=0,y=0,z=0})
+							mobkit.animate(self,'eat')
+							--water_life.temp_show(snack,5)
+							sinit = true
+							
+							minetest.after(2,function ()
+								local nname = minetest.get_node(snack).name
+								if nname == "default:papyrus" then
+									minetest.dig_node(snack)
+								elseif nname == "default:dirt_with_grass" then
+									minetest.set_node(snack,{name="default:dirt"})
+								else
+									minetest.set_node(snack,{name="air"})
+								end
+								anim = true
+							end)
+						elseif anim and sinit then
 							water_life.hunger(self,5)
 							return true 
 						end
