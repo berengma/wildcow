@@ -67,7 +67,7 @@ local function sortout(self,ftable)
 		end
 		]]
 		local way = water_life.find_path(pos, ftable[i], self, self.dtime,true)
-		minetest.chat_send_all(dump(way))
+		--minetest.chat_send_all(dump(way))
 		if not way or #way < 2 then table.remove(ftable,i) end
 	end
 	return ftable
@@ -84,6 +84,7 @@ function wildcow.hq_overrun(self,prty,target)
 	local hit = false
 	
 	local func = function(self)
+		
 		if not mobkit.is_alive(target) then return true end
 		local dist = water_life.dist2tgt(self,target)
 		if dist > self.view_range then return true end
@@ -260,7 +261,7 @@ function wildcow.hq_find_food(self,prty,radius)
 	local pos2 = {x=pos.x +radius,y=pos.y+1,z=pos.z+radius}
 	local food = minetest.find_node_near(pos,radius, {"group:growing","group:plant"})
 	if not food then food = minetest.find_node_near(pos,radius, {"group:flora","default:papyrus","default:dry_shrub"}) end
-	if not food then food =  minetest.find_node_near(pos, 5, {"default:dirt_with_grass"}) end
+	if not food then food =  minetest.find_node_near(pos, radius, {"default:dirt_with_grass"}) end
 	if not food then return true end
 	local snack = food
 	local anim = false

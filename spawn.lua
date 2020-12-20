@@ -30,10 +30,11 @@ local function spawnstep(dtime)
 			local yaw = plyr:get_look_horizontal()
 			local animal = water_life.count_objects(pos)
 			if animal.all > water_life.maxmobs then toomuch = true end
+			if pos.y < 0 or pos.y > wildcow.maxheight then toomuch = true end						-- no spawn under 0 and above maxheight
 			
 			local radius = (water_life.abr * 12)												-- 75% from 16 = 12 nodes
 			radius = random(16,radius)														-- not nearer than 7 nodes in front of player
-			local angel = math.rad(random(80))                                       					-- look for random angel 0 - 75 degrees
+			local angel = math.rad(random(80))                                       					-- look for random angel 0 - 80 degrees
 			if water_life.leftorright() then yaw = yaw + angel else yaw = yaw - angel end   			-- add or substract to/from yaw
 			local pos2 = mobkit.pos_translate2d(pos,yaw,radius)									-- calculate position
 			local bdata =  water_life_get_biome_data(pos2)										-- get biome data at spawn position
@@ -60,7 +61,7 @@ local function spawnstep(dtime)
 			
 
 			if landpos and not toomuch then
-				if not minetest.is_protected(landpos,mobname) then
+				if not minetest.is_protected(landpos,mobname) then					-- do not spawn in protected areas
 					local obj = minetest.add_entity(landpos,mobname)
 					if obj then
 						local entity = obj:get_luaentity()
