@@ -191,6 +191,7 @@ function wildcow.hq_stare(self,prty,target)
 		if not mobkit.is_alive(target) then return true end
 		if init then
 			mobkit.animate(self,"headdown")
+			mobkit.make_sound(self,"angry")
 			init = false
 		end
 		local pos = self.object:get_pos()

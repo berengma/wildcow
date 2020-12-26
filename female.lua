@@ -91,6 +91,11 @@ local function female_brain(self)
 			childent = baby[1]:get_luaentity()								-- get the entity to do further checks
 		end
 		
+		local rnd = random(1000)
+		if rnd < 10 then
+			mobkit.make_sound(self,"idle")
+		end
+		
 		if childent then
 			predator = water_life.get_closest_enemy(childent,true)
 			if predator then
@@ -233,10 +238,6 @@ minetest.register_entity("wildcow:auroch_female",{
 	max_hp = 25,
 	timeout = wildcow.lifetime,
 	attack={range=0.5,damage_groups={fleshy=5}},
-	sounds = {
-		--scared='deer_scared',
-		--hurt = 'deer_hurt',
-		},
 	animation = {
 	walk={range={x=216,y=231},speed=10,loop=true},
 	trot={range={x=85,y=114},speed=20,loop=true},
@@ -249,7 +250,16 @@ minetest.register_entity("wildcow:auroch_female",{
 		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
 	},
-	
+	sounds = {
+		idle={
+			{name = "wildcow_cow1",
+			gain = water_life.soundadjust},
+			{name = "wildcow_cow2",
+			gain = water_life.soundadjust},
+			{name = "wildcow_cow3",
+			gain = water_life.soundadjust},
+			}
+		},
 	brainfunc = female_brain,
 
 	on_punch=function(self, puncher, time_from_last_punch, tool_capabilities, dir)

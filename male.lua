@@ -83,7 +83,10 @@ local function male_brain(self)
 		local obj = self.object
 		local pos = self.object:get_pos()
 		local bosspos = water_life.headpos(self)
-		
+		local rnd = random(1000)
+		if rnd < 20 then
+			mobkit.make_sound(self,"idle")
+		end
 		
 		if wildcow.debug then
 			local kepala = ""
@@ -178,10 +181,6 @@ minetest.register_entity("wildcow:auroch_male",{
 	max_hp = 25,
 	timeout = wildcow.lifetime,
 	attack={range=0.5,damage_groups={fleshy=10}},
-	sounds = {
-		--scared='deer_scared',
-		--hurt = 'deer_hurt',
-		},
 	animation = {
 	walk={range={x=216,y=231},speed=10,loop=true},
 	trot={range={x=85,y=114},speed=20,loop=true},
@@ -195,6 +194,22 @@ minetest.register_entity("wildcow:auroch_male",{
 		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
 		{name = "water_life:meat_raw", chance = 2, min = 1, max = 3,},
 	},
+	sounds = {
+		angry={
+			{name = 'wildcow_bull_angry',
+			gain = water_life.soundadjust},
+			{name = 'wildcow_bull_angry2',
+			gain = water_life.soundadjust},
+			},
+		idle={
+			{name = "wildcow_bull1",
+			gain = water_life.soundadjust},
+			{name = "wildcow_bull2",
+			gain = water_life.soundadjust},
+			{name = "wildcow_bull3",
+			gain = water_life.soundadjust},
+			}
+		},
 	
 	brainfunc = male_brain,
 
