@@ -9,7 +9,7 @@ local function calf_brain(self)
 	if self.hp <= 0 then	
 		mobkit.clear_queue_high(self)
 		water_life.handle_drops(self)
-		mobkit.hq_die(self)
+		water_life.hq_die(self,"die")
 		return
 	end
 	
@@ -39,7 +39,7 @@ local function calf_brain(self)
 			local name = "wildcow:auroch_female"
 			if random(100) > 50 then name = "wildcow:auroch_male" end
 			mobkit.clear_queue_high(self)
-			mobkit.hq_die(self)
+			water_life.hq_die(self,"die")
 			--self.object:remove()
 			local obj = minetest.add_entity(pos,name)
 			if obj then
@@ -118,12 +118,14 @@ minetest.register_entity("wildcow:auroch_calf",{
 		--hurt = 'deer_hurt',
 		},
 	animation = {
+     def={range={x=31,y=74},speed=15,loop=true},             
 	walk={range={x=216,y=231},speed=10,loop=true},
 	trot={range={x=85,y=114},speed=20,loop=true},
 	run={range={x=120,y=140},speed=30,loop=true},
 	stand={range={x=31,y=74},speed=15,loop=true},
 	eat={range={x=0,y=30},speed=15,loop=true},
 	attack={range={x=145,y=160},speed=20,loop=true},
+	die={range={x=191,y=211},speed=10,loop=false},
 	},
 	drops = {
 		{name = "default:diamond", chance = 50, min = 1, max = 1,},		
@@ -141,6 +143,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 		local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
 		self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
 		mobkit.make_sound(self,'hurt')
+		if water_life.bloody then water_life.spilltheblood(self.object) end
 		mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
 	end,
 	

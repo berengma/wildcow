@@ -3,6 +3,7 @@ local abs = math.abs
 
 
 local function male_brain(self)
+	local prty = mobkit.get_queue_priority(self)
 	if self.tamed == nil then self.tamed = false end
 	if mobkit.timer(self,1) then wildcow.node_dps_dmg(self) end
 	mobkit.vitals(self)
@@ -10,7 +11,7 @@ local function male_brain(self)
 	if self.hp <= 0 then	
 		mobkit.clear_queue_high(self)
 		water_life.handle_drops(self)
-		mobkit.hq_die(self)
+		water_life.hq_die(self,"die")
 		return
 	end
 	
@@ -24,7 +25,7 @@ local function male_brain(self)
 	if mobkit.timer(self,10) then
 		water_life.is_alive(self,-10)
 		if water_life.hunger(self) < 10 then mobkit.hurt(self,5) end
-		local prty = mobkit.get_queue_priority(self)
+		
 		local horny = water_life.horny(self)
 		local hunger = water_life.hunger(self)
 		
@@ -36,11 +37,9 @@ local function male_brain(self)
 	end
 	
 	if mobkit.timer(self,2) then
-		local prty = mobkit.get_queue_priority(self)
-		
 		if water_life.is_alive(self) < 0 then
 			mobkit.clear_queue_high(self)
-			mobkit.hq_die(self)
+			water_life.hq_die(self,"die")
 			return
 		end
 		
@@ -79,9 +78,9 @@ local function male_brain(self)
 	end
 	
 	if mobkit.timer(self,1) then 
-		local prty = mobkit.get_queue_priority(self)
 		local obj = self.object
 		local pos = self.object:get_pos()
+		local raypos = mobkit.pos_shift(pos,{y=1})
 		local bosspos = water_life.headpos(self)
 		local rnd = random(1000)
 		if rnd < 20 then
@@ -118,8 +117,10 @@ local function male_brain(self)
 			local plyr = mobkit.get_nearby_player(self)
 			if plyr and vector.distance(pos,plyr:get_pos()) < 16 and not self.tamed then 
 				local pl_pos = plyr:get_pos()
-				--minetest.chat_send_all(dump(abs(pos.y - pl_pos.y)))
-				if abs(pos.y - pl_pos.y) < 1.99 then
+				local collide = water_life.find_collision(raypos,{x=pl_pos.x, y=pl_pos.y + 1.8, z= pl_pos.z},true,true)
+				
+				--minetest.chat_send_all(dump(abs(pos.y - pl_pos.y)).." : "..dump(collide))
+				if abs(pos.y - pl_pos.y) < 1.99 and not collide then
 					mobkit.clear_queue_high(self)
 					wildcow.hq_stare(self,13,plyr)
 					return
@@ -182,6 +183,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	timeout = wildcow.lifetime,
 	attack={range=0.5,damage_groups={fleshy=10}},
 	animation = {
+	def={range={x=31,y=74},speed=15,loop=true},
 	walk={range={x=216,y=231},speed=10,loop=true},
 	trot={range={x=85,y=114},speed=20,loop=true},
 	run={range={x=120,y=140},speed=30,loop=true},
@@ -189,6 +191,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	eat={range={x=0,y=30},speed=15,loop=true},
 	attack={range={x=145,y=160},speed=20,loop=true},
 	headdown={range={x=150,y=150},speed =0, loop=false},
+	die={range={x=191,y=211},speed=10,loop=false},
 	},
 	drops = {
 		{name = "default:diamond", chance = 20, min = 1, max = 3,},		
@@ -218,9 +221,11 @@ minetest.register_entity("wildcow:auroch_male",{
 			local hvel = vector.multiply(vector.normalize({x=dir.x,y=0,z=dir.z}),4)
 			self.object:set_velocity({x=hvel.x,y=2,z=hvel.z})
 			mobkit.make_sound(self,'hurt')
+			if water_life.bloody then water_life.spilltheblood(self.object) end
 			mobkit.hurt(self,tool_capabilities.damage_groups.fleshy or 1)
 		elseif not puncher:is_player() then
 			mobkit.make_sound(self,'hurt')
+			if water_life.bloody then water_life.spilltheblood(self.object) end
 			mobkit.hurt(self,self.attack.damage_groups.fleshy or 1)
 		end
 	end,
