@@ -135,7 +135,7 @@ function wildcow.hq_meetmygirl(self,prty)
 				end
 			end
 			init = false
-			if passangan == {} then return true end
+			if passangan == {} or not mobkit.is_alive(passangan:get_luaentity())  then return true end
 			tpos = passangan:get_pos()
 			--water_life.temp_show(tpos,5,5)
 			if not water_life.gopath(self,tpos,nil,wildcow.fast_pf) then
@@ -145,6 +145,7 @@ function wildcow.hq_meetmygirl(self,prty)
 		end
 		
 		if mobkit.is_queue_empty_low(self) and self.isonground then
+			if not mobkit.is_alive(passangan:get_luaentity()) then return true end
 			pos = mobkit.get_stand_pos(self)
 			tpos = passangan:get_pos()
 			
@@ -191,21 +192,24 @@ function wildcow.hq_stare(self,prty,target)
 		if not mobkit.is_alive(target) then return true end
 		if init then
 			mobkit.animate(self,"headdown")
-			mobkit.make_sound(self,"angry")
+			if random(100) < 33 then
+				mobkit.make_sound(self,"angry")
+			end
 			init = false
 		end
 		local pos = self.object:get_pos()
 		local tyaw = water_life.get_yaw_to_object(self,target)
 		local yaw = self.object:get_yaw()
 		local tpos = target:get_pos()
-		local apos = mobkit.pos_translate2d(pos,tyaw,10)
+		local raypos = mobkit.pos_shift(pos,{y=1})
 		gethim = gethim - self.dtime
 		
+		if mobkit.timer(self,1) and target:is_player() and water_life.find_collision(raypos,{x=tpos.x, y=tpos.y + 1.8, z= tpos.z},true,true) then return true end
 		if water_life.dist2tgt(self,target) > 15 then return true end
 		if water_life.dist2tgt(self,target) < 8 or gethim < 0 then
-			--mobkit.lq_dumbwalk(self,apos,2)
 			water_life.hunger(self,-5)
 			wildcow.hq_overrun(self,prty+1,target)
+			--return true
 		end
 		
 		--minetest.chat_send_all(dump(yaw).." : "..dump(tyaw).."  >>  "..dump(abs(tyaw-yaw)))
