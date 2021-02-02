@@ -111,7 +111,7 @@ minetest.register_entity("wildcow:auroch_calf",{
 	view_range = 10,
 	lung_capacity = 20,			-- seconds
 	max_hp = 13,
-	timeout = 1440,
+	timeout = 0,
 	attack={range=0.5,damage_groups={fleshy=5}},
 	sounds = {
 		--scared='deer_scared',

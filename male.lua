@@ -180,7 +180,7 @@ minetest.register_entity("wildcow:auroch_male",{
 	view_range = 14,
 	lung_capacity = 20,			-- seconds
 	max_hp = 25,
-	timeout = wildcow.lifetime,
+	timeout = -1*wildcow.lifetime,
 	attack={range=0.5,damage_groups={fleshy=10}},
 	animation = {
 	def={range={x=31,y=74},speed=15,loop=true},
